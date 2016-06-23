@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.example.zsurani.nytsearch1.Article;
 import com.example.zsurani.nytsearch1.ArticleArrayAdapter;
@@ -31,31 +30,42 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import cz.msebera.android.httpclient.Header;
 
 public class SearchActivity extends AppCompatActivity {
 
     //EditText etQuery;
-    GridView gvResults;
+    // GridView gvResults;
     //Button btnSearch;
     ArrayList<Article> articles;
     ArticleArrayAdapter adapter;
     String date;
     String order;
     String n_values;
+    String p_query;
+
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    //@BindView(R.id.gvResults) GridView lvItems;
+    @BindView(R.id.gvResults) GridView gvResults;
+    @BindView(R.id.btnSearch) Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
+        // Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setupViews();
-        setupFiltersListener();
+        //setupFiltersListener();
 
-        GridView lvItems = (GridView) findViewById(R.id.gvResults);
+
+        //GridView lvItems = (GridView) findViewById(R.id.gvResults);
         // Attach the listener to the AdapterView onCreate
-        lvItems.setOnScrollListener(new EndlessScrollListener() {
+        gvResults.setOnScrollListener(new EndlessScrollListener() {
             @Override
             public boolean onLoadMore(int page, int totalItemsCount) {
                 // Triggered only when new data needs to be appended to the list
@@ -67,19 +77,64 @@ public class SearchActivity extends AppCompatActivity {
         });
     }
 
-    public void customLoadMoreDataFromApi(int offset) {
+    public void customLoadMoreDataFromApi(int page) {
 
-        // This method probably sends out a network request and appends new data items to your adapter.
-        // Use the offset value and add it as a parameter to your API request to retrieve paginated data.
-        // Deserialize API response and then construct new objects to append to the adapter
-        // gv.addAll(offset);
-        adapter.notifyDataSetChanged();
+        AsyncHttpClient client = new AsyncHttpClient();
+        String url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
+        RequestParams params = new RequestParams();
+        params.put("api-key", "447a938cd4b5488fa13bc371599396ee");
+        params.put("page", 0);
+
+        //Toast.makeText(this, date, Toast.LENGTH_SHORT).show();
+
+        if (date == null)
+        {
+        } else if (date.length() > 4) {
+            params.put("begin_date", date);
+        }
+
+        if (order == null)
+        {
+        } else if (order.equals("none")) {
+        } else if (date.length() > 4) {
+            params.put("sort", order);
+        }
+
+        if (n_values == null)
+        {
+        } else if (n_values.length() > 4) {
+            params.put("news_desk", n_values);
+        }
+
+        // Toast.makeText(this, n_values, Toast.LENGTH_SHORT).show();
+
+        params.put("q", p_query);
+
+        client.get(url, params, new JsonHttpResponseHandler(){
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                Log.d("DEBUG", response.toString());
+                JSONArray articleJsonResults = null;
+
+                try{
+                    articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
+                    adapter.addAll(Article.fromJSONArray(articleJsonResults));
+                    Log.d("DEBUG", articles.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+
+                }
+            }
+        });
     }
 
     public void setupViews() {
-        //etQuery = (EditText) findViewById(R.id.etQuery);
-        gvResults = (GridView) findViewById(R.id.gvResults);
-//        btnSearch = (Button) findViewById(R.id.btnSearch);
+        // gvResults = (GridView) findViewById(R.id.gvResults);
         articles = new ArrayList<>();
         adapter = new ArticleArrayAdapter(this, articles);
         adapter = new ArticleArrayAdapter(this, articles);
@@ -139,9 +194,10 @@ public class SearchActivity extends AppCompatActivity {
             params.put("news_desk", n_values);
         }
 
-        Toast.makeText(this, n_values, Toast.LENGTH_SHORT).show();
+        // Toast.makeText(this, n_values, Toast.LENGTH_SHORT).show();
 
         params.put("q", query);
+        p_query = query;
 
         client.get(url, params, new JsonHttpResponseHandler(){
             @Override
@@ -156,6 +212,7 @@ public class SearchActivity extends AppCompatActivity {
 
                 try{
                     articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
+                    adapter.clear();
                     adapter.addAll(Article.fromJSONArray(articleJsonResults));
                     Log.d("DEBUG", articles.toString());
                 } catch (JSONException e) {
@@ -168,18 +225,21 @@ public class SearchActivity extends AppCompatActivity {
 
     private final int REQUEST_CODE = 20;
 
-    private void setupFiltersListener() {
-        Button button = (Button) findViewById(R.id.btnSearch);
-        assert button != null;
-        button.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
+//    private void setupFiltersListener() {
+//        // Button button = (Button) findViewById(R.id.btnSearch);
+//        assert button != null;
+//        button.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//
+//        });
+//    }
 
-                Intent i = new Intent(SearchActivity.this, FilterActivity.class);
-                startActivityForResult(i, REQUEST_CODE); // brings up the second activity
+    @OnClick(R.id.btnSearch)
+    public void onButtonClick(View v) {
 
-            }
-        });
+        Intent i = new Intent(SearchActivity.this, FilterActivity.class);
+        startActivityForResult(i, REQUEST_CODE); // brings up the second activity
+
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

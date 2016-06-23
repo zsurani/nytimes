@@ -12,17 +12,23 @@ import android.widget.Spinner;
 
 import java.util.Calendar;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class FilterActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
     String year1;
     String month;
     String day;
     String n_values = null;
+    @BindView(R.id.etDate) EditText etDate;
+    @BindView(R.id.spinner) Spinner spinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
+        ButterKnife.bind(this);
     }
 
     // attach to an onclick handler to show the date picker
@@ -62,7 +68,8 @@ public class FilterActivity extends AppCompatActivity implements DatePickerDialo
 
         year1 = (String) "" + year;
 
-        ((EditText) findViewById(R.id.etDate)).setText(monthOfYear + "/" + dayOfMonth + "/" + year);
+
+        etDate.setText(monthOfYear + "/" + dayOfMonth + "/" + year);
 
     }
 
@@ -73,6 +80,7 @@ public class FilterActivity extends AppCompatActivity implements DatePickerDialo
         // Check which checkbox was clicked
         switch(view.getId()) {
             case R.id.checkbox_arts:
+
                 if (checked) {
                     n_values = "arts";
                 }
@@ -112,7 +120,7 @@ public class FilterActivity extends AppCompatActivity implements DatePickerDialo
 
         data.putExtra("date", date);
 
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
+        //Spinner spinner = (Spinner) findViewById(R.id.spinner);
         String order = spinner.getSelectedItem().toString();
 
 
