@@ -4,4 +4,18 @@
     <string name="hint">Enter a search query</string>
     <string name="search">Search</string>
     <string name="title_activity_article">ArticleActivity</string>
+    <string name="filter">Filter</string>
+    <string name="date">Begin Date</string>
+    <string name="choose">Choose</string>
+    <string name="save">Save</string>
+    <string name="sort">Sort Order</string>
+    <string name="values">News Desk Values</string>
+    <string name="arts">Arts</string>
+    <string name="fashion"><![CDATA[Fashion & Style]]></string>
+    <string name="sports">Sports</string>
+    <string-array name="ordering_arrays">
+        <item>none</item>
+        <item>oldest</item>
+        <item>newest</item>
+    </string-array>
 </resources>

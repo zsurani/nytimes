@@ -13,12 +13,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.example.zsurani.nytsearch1.Article;
 import com.example.zsurani.nytsearch1.ArticleArrayAdapter;
 import com.example.zsurani.nytsearch1.EndlessScrollListener;
+import com.example.zsurani.nytsearch1.FilterActivity;
 import com.example.zsurani.nytsearch1.R;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -34,11 +35,14 @@ import cz.msebera.android.httpclient.Header;
 
 public class SearchActivity extends AppCompatActivity {
 
-    EditText etQuery;
+    //EditText etQuery;
     GridView gvResults;
-    Button btnSearch;
+    //Button btnSearch;
     ArrayList<Article> articles;
     ArticleArrayAdapter adapter;
+    String date;
+    String order;
+    String n_values;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +51,7 @@ public class SearchActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setupViews();
+        setupFiltersListener();
 
         GridView lvItems = (GridView) findViewById(R.id.gvResults);
         // Attach the listener to the AdapterView onCreate
@@ -63,13 +68,16 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     public void customLoadMoreDataFromApi(int offset) {
+
         // This method probably sends out a network request and appends new data items to your adapter.
         // Use the offset value and add it as a parameter to your API request to retrieve paginated data.
         // Deserialize API response and then construct new objects to append to the adapter
+        // gv.addAll(offset);
+        adapter.notifyDataSetChanged();
     }
 
     public void setupViews() {
-        etQuery = (EditText) findViewById(R.id.etQuery);
+        //etQuery = (EditText) findViewById(R.id.etQuery);
         gvResults = (GridView) findViewById(R.id.gvResults);
 //        btnSearch = (Button) findViewById(R.id.btnSearch);
         articles = new ArrayList<>();
@@ -89,65 +97,6 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        // added because of search view
-
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_search, menu);
-        MenuItem searchItem = menu.findItem(R.id.action_search);
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                // perform query here
-                //query = etQuery.getText().toString();
-                //Toast.makeText(this, "Searching for " + query, Toast.LENGTH_LONG).show();
-                AsyncHttpClient client = new AsyncHttpClient();
-                String url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
-                RequestParams params = new RequestParams();
-                params.put("api-key", "447a938cd4b5488fa13bc371599396ee");
-                params.put("page", 0);
-                params.put("q", query);
-
-                client.get(url, params, new JsonHttpResponseHandler(){
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        Log.d("DEBUG", response.toString());
-                        JSONArray articleJsonResults = null;
-
-                        try{
-                            articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
-                            adapter.addAll(Article.fromJSONArray(articleJsonResults));
-                            Log.d("DEBUG", articles.toString());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-
-                        }
-                    }
-                });
-                // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
-                // see https://code.google.com/p/android/issues/detail?id=24599
-                searchView.clearFocus();
-
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
-
-        return super.onCreateOptionsMenu(menu);
-
-
-
-        //getMenuInflater().inflate(R.menu.menu_search, menu);
-        //return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -162,31 +111,116 @@ public class SearchActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-//    public void onArticleSearch(View view) {
-//        String query = etQuery.getText().toString();
-//        //Toast.makeText(this, "Searching for " + query, Toast.LENGTH_LONG).show();
-//        AsyncHttpClient client = new AsyncHttpClient();
-//        String url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
-//        RequestParams params = new RequestParams();
-//        params.put("api-key", "447a938cd4b5488fa13bc371599396ee");
-//        params.put("page", 0);
-//        params.put("q", query);
-//
-//        client.get(url, params, new JsonHttpResponseHandler(){
-//            @Override
-//            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-//                Log.d("DEBUG", response.toString());
-//                JSONArray articleJsonResults = null;
-//
-//                try{
-//                    articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
-//                    adapter.addAll(Article.fromJSONArray(articleJsonResults));
-//                    Log.d("DEBUG", articles.toString());
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//
-//                }
-//            }
-//        });
-//    }
+    public void onArticleSearch(String query) {
+        AsyncHttpClient client = new AsyncHttpClient();
+        String url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
+        RequestParams params = new RequestParams();
+        params.put("api-key", "447a938cd4b5488fa13bc371599396ee");
+        params.put("page", 0);
+
+        //Toast.makeText(this, date, Toast.LENGTH_SHORT).show();
+
+        if (date == null)
+        {
+        } else if (date.length() > 4) {
+            params.put("begin_date", date);
+        }
+
+        if (order == null)
+        {
+        } else if (order.equals("none")) {
+        } else if (date.length() > 4) {
+            params.put("sort", order);
+        }
+
+        if (n_values == null)
+        {
+        } else if (n_values.length() > 4) {
+            params.put("news_desk", n_values);
+        }
+
+        Toast.makeText(this, n_values, Toast.LENGTH_SHORT).show();
+
+        params.put("q", query);
+
+        client.get(url, params, new JsonHttpResponseHandler(){
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                Log.d("DEBUG", response.toString());
+                JSONArray articleJsonResults = null;
+
+                try{
+                    articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
+                    adapter.addAll(Article.fromJSONArray(articleJsonResults));
+                    Log.d("DEBUG", articles.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+
+                }
+            }
+        });
+    }
+
+    private final int REQUEST_CODE = 20;
+
+    private void setupFiltersListener() {
+        Button button = (Button) findViewById(R.id.btnSearch);
+        assert button != null;
+        button.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+
+                Intent i = new Intent(SearchActivity.this, FilterActivity.class);
+                startActivityForResult(i, REQUEST_CODE); // brings up the second activity
+
+            }
+        });
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+            date = data.getExtras().getString("date");
+
+            order = data.getExtras().getString("ordering");
+
+            n_values = data.getExtras().getString("checkboxes");
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        // added because of search view
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_search, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                onArticleSearch(query);
+
+                searchView.clearFocus();
+
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        return super.onCreateOptionsMenu(menu);
+
+        //getMenuInflater().inflate(R.menu.menu_search, menu);
+        //return true;
+    }
 }

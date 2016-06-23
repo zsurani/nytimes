@@ -8,6 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".activities.SearchActivity"
     tools:showIn="@layout/activity_search">
@@ -24,21 +25,34 @@
         <!--android:layout_toStartOf="@+id/btnSearch"-->
 
 
-    <!--<Button-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="@string/search"-->
-        <!--android:id="@+id/btnSearch"-->
-        <!--android:layout_alignBottom="@+id/etQuery"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_alignParentEnd="true"-->
-        <!--android:onClick="onArticleSearch"/>-->
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/filter"
+        android:id="@+id/btnSearch"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="onClick"/>
 
     <GridView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/gvResults"
-        android:layout_below="@+id/etQuery"
-        android:layout_centerHorizontal="true"
-        android:numColumns="4" />
+        android:numColumns="4"
+        android:layout_below="@+id/btnSearch"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+        <!--android:layout_below="@+id/etQuery"-->
+
+     <!--<android.support.v7.widget.Toolbar-->
+         <!--android:id="@+id/toolbar"-->
+         <!--android:minHeight="?attr/actionBarSize"-->
+         <!--android:layout_width="match_parent"-->
+         <!--android:layout_height="wrap_content"-->
+         <!--app:titleTextColor="@android:color/holo_red_dark"-->
+         <!--android:background="?attr/colorPrimary">-->
+     <!--</android.support.v7.widget.Toolbar>-->
+
+        <!-- Layout for content is here. This can be a RelativeLayout  -->
+
 </RelativeLayout>
