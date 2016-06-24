@@ -65,6 +65,9 @@ public class ArticleArrayAdapter extends ArrayAdapter<Article> {
             if (!TextUtils.isEmpty(thumbnail)) {
                 Glide.with(getContext()).load(thumbnail).placeholder(holder.place).into(holder.imageView);
             }
+//              else {
+//                Glide.with(getContext()).load(holder.place).into(holder.imageView);
+//            }
 
         return convertView;
     }
